@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="700.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+<AnchorPane prefHeight="700.0" prefWidth="854.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
    <children>
-      <SplitPane dividerPositions="0.29083094555873923" layoutX="14.0" layoutY="221.0" prefHeight="700.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <TextField fx:id="txtUsername" layoutX="23.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Username" text="postgres" />
+      <TextField fx:id="txtPassword" layoutX="198.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Password" text="postgres" />
+      <TextField fx:id="txtServerUrl" layoutX="381.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Server Url" text="localhost" />
+      <TextField fx:id="txtDatabase" layoutX="565.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Database" text="viewtrust_dev1" />
+      <Button fx:id="btnLogin" layoutX="761.0" layoutY="34.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" text="Login" />
+      <Label fx:id="lblError" layoutX="23.0" layoutY="73.0" prefHeight="26.0" prefWidth="830.0" textFill="#f20f0f" />
+      <SplitPane fx:id="splitPaneRoot" dividerPositions="0.29083094555873923" layoutY="105.0" prefHeight="595.0" prefWidth="854.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
@@ -28,18 +37,26 @@
                         <Glow />
                      </effect>
                   </Label>
-                  <ListView fx:id="listTableNames" layoutY="59.0" prefHeight="639.0" prefWidth="199.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="59.0" />
+                  <ListView fx:id="listTableNames" layoutX="106.0" onMouseClicked="#handleMouseClick" prefHeight="612.0" prefWidth="246.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
           <AnchorPane>
                <children>
-                  <TabPane layoutX="46.0" layoutY="66.0" prefHeight="698.0" prefWidth="491.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TabPane fx:id="tabPaneOperations" layoutX="46.0" prefHeight="612.0" prefWidth="602.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
                       <Tab fx:id="tabCreate" text="Create">
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <AnchorPane prefHeight="665.0" prefWidth="491.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <ListView fx:id="listColumnNames" layoutX="14.0" layoutY="35.0" prefHeight="527.0" prefWidth="602.0" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="-14.0" AnchorPane.topAnchor="35.0" />
+                                    <Label fx:id="lblTableName" alignment="CENTER_RIGHT" layoutX="397.0" layoutY="-2.0" prefHeight="32.0" prefWidth="190.0" textAlignment="RIGHT" textOverrun="WORD_ELLIPSIS">
+                                       <font>
+                                          <Font name="Times New Roman Bold" size="20.0" />
+                                       </font>
+                                       <cursor>
+                                          <Cursor fx:constant="DEFAULT" />
+                                       </cursor>
+                                    </Label>
                                  </children></AnchorPane>
                         </content>
                       </Tab>
