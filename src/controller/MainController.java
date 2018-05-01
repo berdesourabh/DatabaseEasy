@@ -15,6 +15,8 @@ import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
@@ -99,14 +101,20 @@ public class MainController implements Initializable {
 			lblTableName.setText(selectedTable.toUpperCase());
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
 			ObservableList<String> columnList = FXCollections.observableArrayList();
-
+			List<String> typeList = new ArrayList<>();
 			while (columnResultSet.next()) {
 				columnList.add(columnResultSet.getString("COLUMN_NAME"));
+				typeList.add(columnResultSet.getString("TYPE_NAME"));
+				//ToDo:[bigserial, varchar, varchar, bool, varchar, timestamptz, varchar, timestamptz, uuid, int8] 
+				//make Map of column name and data type and traverse through to add it in label and promptedText
+				//also we can check type and decide to give textfield or drop down
 			}
 
             for (String column: columnList) {
 
                 Label label = new Label(column);
+                TextField textField = new TextField();
+                textField.promptTextProperty();
                 label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
                 gridPaneCreate.add(label,rowIdx,colIdx);
                 colIdx++;
