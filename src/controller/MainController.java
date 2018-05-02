@@ -1,23 +1,28 @@
 package controller;
 
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
+import javafx.geometry.HPos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.shape.Rectangle;
-
-import java.net.URL;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
 
@@ -47,7 +52,7 @@ public class MainController implements Initializable {
 
 	@FXML
 	public ListView<String> listTableNames;
-	
+
 	@FXML
 	public GridPane gridPaneCreate;
 
@@ -63,7 +68,7 @@ public class MainController implements Initializable {
 	}
 
 	@FXML
-    private void onLoginClick(ActionEvent event) {
+	private void onLoginClick(ActionEvent event) {
 		clearContent();
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -81,7 +86,7 @@ public class MainController implements Initializable {
 
 	}
 
-    private void showTables(String dbName) throws SQLException {
+	private void showTables(String dbName) throws SQLException {
 		metaData = connection.getMetaData();
 		String[] types = { "TABLE" };
 		ResultSet rs = metaData.getTables(null, "public", "%", types);
@@ -96,29 +101,40 @@ public class MainController implements Initializable {
 	}
 
 	public void showColumns(String selectedTable) {
-	    int rowIdx = 0, colIdx = 0;
+
 		try {
 			lblTableName.setText(selectedTable.toUpperCase());
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
 			ObservableList<String> columnList = FXCollections.observableArrayList();
 			List<String> typeList = new ArrayList<>();
+
+			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
-				columnList.add(columnResultSet.getString("COLUMN_NAME"));
-				typeList.add(columnResultSet.getString("TYPE_NAME"));
-				//ToDo:[bigserial, varchar, varchar, bool, varchar, timestamptz, varchar, timestamptz, uuid, int8] 
-				//make Map of column name and data type and traverse through to add it in label and promptedText
-				//also we can check type and decide to give textfield or drop down
+
+				columnToTypeMap.put(columnResultSet.getString("COLUMN_NAME"), columnResultSet.getString("TYPE_NAME"));
+				// columnList.add(columnResultSet.getString("COLUMN_NAME"));
+				// typeList.add(columnResultSet.getString("TYPE_NAME"));
+
+				// ToDo:[bigserial, varchar, varchar, bool, varchar, timestamptz, varchar,
+				// timestamptz, uuid, int8]
+				// make Map of column name and data type and traverse through to add it in label
+				// and promptedText
+				// also we can check type and decide to give textfield or drop down
 			}
+			int rowIdx = 0, colIdx = 0;
+			for (Map.Entry<String, String> map : columnToTypeMap.entrySet()) {
+				Label label = new Label(map.getKey() + ":");
+				TextField textField = new TextField();
+				textField.setPromptText(map.getValue());
+				label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
+				GridPane.setHalignment(label, HPos.CENTER);
+				gridPaneCreate.add(label, 0, colIdx);
+				GridPane.setHalignment(textField, HPos.LEFT);
+				if(!map.getKey().equals("id"))
+				gridPaneCreate.add(textField, 1, colIdx);
 
-            for (String column: columnList) {
-
-                Label label = new Label(column);
-                TextField textField = new TextField();
-                textField.promptTextProperty();
-                label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
-                gridPaneCreate.add(label,rowIdx,colIdx);
-                colIdx++;
-            }
+				colIdx++;
+			}
 		} catch (Exception e) {
 			lblError.setText(e.getMessage());
 		}
@@ -126,9 +142,9 @@ public class MainController implements Initializable {
 	}
 
 	@FXML
-    private void handleMouseClick(MouseEvent arg0) {
+	private void handleMouseClick(MouseEvent arg0) {
 		try {
-		    gridPaneCreate.getChildren().clear();
+			gridPaneCreate.getChildren().clear();
 			showColumns(listTableNames.getSelectionModel().getSelectedItem());
 		} catch (Exception e) {
 			lblError.setText(e.getMessage());
