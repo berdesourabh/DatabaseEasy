@@ -9,6 +9,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.Glow?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -17,13 +18,13 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="841.0" prefWidth="933.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+<AnchorPane prefHeight="846.0" prefWidth="969.0" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
    <children>
       <TextField fx:id="txtUsername" layoutX="23.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Username" text="postgres" />
-      <TextField fx:id="txtPassword" layoutX="198.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Password" text="postgres" />
-      <TextField fx:id="txtServerUrl" layoutX="381.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Server Url" text="localhost" />
-      <TextField fx:id="txtDatabase" layoutX="565.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Database" text="viewtrust_dev1" />
-      <Button fx:id="btnLogin" layoutX="815.0" layoutY="34.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" text="Login" />
+      <TextField fx:id="txtPassword" layoutX="215.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Password" text="postgres" />
+      <TextField fx:id="txtServerUrl" layoutX="420.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Server Url" text="localhost" />
+      <TextField fx:id="txtDatabase" layoutX="631.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Database" text="postgres" />
+      <Button fx:id="btnLogin" layoutX="853.0" layoutY="35.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" text="Login" />
       <Label fx:id="lblError" layoutX="23.0" layoutY="73.0" prefHeight="26.0" prefWidth="830.0" textFill="#f20f0f" />
       <SplitPane fx:id="splitPaneRoot" dividerPositions="0.29083094555873923" layoutY="105.0" prefHeight="595.0" prefWidth="854.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
         <items>
@@ -53,7 +54,7 @@
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <Label fx:id="lblTableName" alignment="CENTER_RIGHT" layoutX="164.0" layoutY="-2.0" prefHeight="32.0" prefWidth="480.0" textAlignment="RIGHT" textOverrun="WORD_ELLIPSIS">
+                                    <Label fx:id="lblTableName" alignment="CENTER_RIGHT" layoutX="180.0" layoutY="-1.0" prefHeight="32.0" prefWidth="480.0" textAlignment="RIGHT" textOverrun="WORD_ELLIPSIS">
                                        <font>
                                           <Font name="Book Antiqua" size="20.0" />
                                        </font>
@@ -61,11 +62,11 @@
                                           <Cursor fx:constant="DEFAULT" />
                                        </cursor>
                                     </Label>
-                                    <AnchorPane layoutX="14.0" layoutY="33.0" prefHeight="685.0" prefWidth="602.0" AnchorPane.bottomAnchor="-13.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="-14.0" AnchorPane.topAnchor="33.0">
+                                    <AnchorPane fx:id="anchorPaneCreate" layoutX="14.0" layoutY="33.0" prefHeight="685.0" prefWidth="602.0" AnchorPane.bottomAnchor="-13.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="-14.0" AnchorPane.topAnchor="33.0">
                                        <children>
-                                          <ScrollPane layoutX="6.0" layoutY="-1.0" prefHeight="684.8" prefWidth="601.6" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <ScrollPane layoutX="6.0" layoutY="-1.0" prefHeight="550.0" prefWidth="682.0" AnchorPane.bottomAnchor="136.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <content>
-                                                <GridPane fx:id="gridPaneCreate" hgap="100.0" prefWidth="534.0" vgap="20.0">
+                                                <GridPane fx:id="gridPaneCreate" hgap="100.0" prefHeight="150.0" prefWidth="549.0" vgap="20.0">
                                                   <columnConstraints>
                                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="370.0" minWidth="50.0" prefWidth="370.0" />
                                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="200.0" />
@@ -76,11 +77,13 @@
                                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                                   </rowConstraints>
                                                    <padding>
-                                                      <Insets bottom="20.0" />
+                                                      <Insets bottom="20.0" top="10.0" />
                                                    </padding>
                                                 </GridPane>
                                              </content>
                                           </ScrollPane>
+                                          <Button fx:id="btnCreateSubmit" layoutX="523.0" layoutY="594.0" mnemonicParsing="false" onAction="#onCreateSubmit" prefHeight="27.0" prefWidth="129.0" text="Submit" />
+                                          <TextArea fx:id="txtAreaQuery" layoutY="556.0" prefHeight="103.0" prefWidth="490.0" />
                                        </children>
                                     </AnchorPane>
                                  </children></AnchorPane>
