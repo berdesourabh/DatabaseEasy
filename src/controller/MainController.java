@@ -121,13 +121,14 @@ public class MainController implements Initializable {
 				// and promptedText
 				// also we can check type and decide to give textfield or drop down
 			}
-			int rowIdx = 0, colIdx = 0;
+			int colIdx = 0;
 			for (Map.Entry<String, String> map : columnToTypeMap.entrySet()) {
 				Label label = new Label(map.getKey() + ":");
+				label.setId(map.getKey());
 				TextField textField = new TextField();
 				textField.setPromptText(map.getValue());
 				label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
-				GridPane.setHalignment(label, HPos.CENTER);
+				GridPane.setHalignment(label, HPos.RIGHT);
 				gridPaneCreate.add(label, 0, colIdx);
 				GridPane.setHalignment(textField, HPos.LEFT);
 				if(!map.getKey().equals("id"))
