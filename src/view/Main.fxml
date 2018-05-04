@@ -24,7 +24,7 @@
       <TextField fx:id="txtPassword" layoutX="215.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Password" text="postgres" />
       <TextField fx:id="txtServerUrl" layoutX="420.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Server Url" text="localhost" />
       <TextField fx:id="txtDatabase" layoutX="631.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Database" text="postgres" />
-      <Button fx:id="btnLogin" layoutX="853.0" layoutY="35.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" text="Login" />
+      <Button fx:id="btnLogin" layoutX="853.0" layoutY="35.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" style="-fx-border-radius: 15px;" text="Login" />
       <Label fx:id="lblError" layoutX="23.0" layoutY="73.0" prefHeight="26.0" prefWidth="830.0" textFill="#f20f0f" />
       <SplitPane fx:id="splitPaneRoot" dividerPositions="0.29083094555873923" layoutY="105.0" prefHeight="595.0" prefWidth="854.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
         <items>
@@ -43,7 +43,8 @@
                         <Glow />
                      </effect>
                   </Label>
-                  <ListView fx:id="listTableNames" layoutX="106.0" onMouseClicked="#handleMouseClick" prefHeight="612.0" prefWidth="246.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="listTableNames" layoutX="106.0" layoutY="33.0" onMouseClicked="#handleMouseClick" prefHeight="706.0" prefWidth="277.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0" />
+                  <TextField fx:id="txtFieldSearch" layoutX="3.0" layoutY="1.0" onKeyTyped="#handleSearch" prefHeight="32.0" prefWidth="277.0" promptText="Search" style="-fx-border-radius: 10;" />
                </children>
             </AnchorPane>
           <AnchorPane>
@@ -66,15 +67,15 @@
                                        <children>
                                           <ScrollPane layoutX="6.0" layoutY="-1.0" prefHeight="550.0" prefWidth="682.0" AnchorPane.bottomAnchor="136.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <content>
-                                                <GridPane fx:id="gridPaneCreate" hgap="100.0" prefHeight="150.0" prefWidth="549.0" vgap="20.0">
+                                                <GridPane fx:id="gridPaneCreate" hgap="100.0" onInputMethodTextChanged="#handleSearch" prefHeight="181.0" prefWidth="614.0" style="-fx-border-radius: 15px;" vgap="20.0">
                                                   <columnConstraints>
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="370.0" minWidth="50.0" prefWidth="370.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="200.0" />
+                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="370.0" minWidth="50.0" prefWidth="263.673095703125" />
+                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="261.48309326171875" minWidth="10.0" prefWidth="250.326904296875" />
                                                   </columnConstraints>
                                                   <rowConstraints>
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                    <RowConstraints maxHeight="45.161041259765625" minHeight="10.0" prefHeight="38.834136962890625" vgrow="SOMETIMES" />
+                                                    <RowConstraints maxHeight="45.326904296875" minHeight="10.0" prefHeight="36.165863037109375" vgrow="SOMETIMES" />
+                                                    <RowConstraints maxHeight="35.829315185546875" minHeight="10.0" prefHeight="35.829315185546875" vgrow="SOMETIMES" />
                                                   </rowConstraints>
                                                    <padding>
                                                       <Insets bottom="20.0" top="10.0" />
