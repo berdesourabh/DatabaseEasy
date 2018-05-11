@@ -11,7 +11,6 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.effect.Glow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -29,19 +28,6 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <Label fx:id="lblMainDBName" layoutX="28.0" layoutY="22.0">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Label>
-                  <Label fx:id="lblMainDBName" graphicTextGap="10.0" layoutX="20.0" layoutY="21.0" prefHeight="26.0" prefWidth="160.0" textAlignment="CENTER" textFill="#0b1517" underline="true">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                     <effect>
-                        <Glow />
-                     </effect>
-                  </Label>
                   <ListView fx:id="listTableNames" layoutX="106.0" layoutY="33.0" onMouseClicked="#handleMouseClick" prefHeight="706.0" prefWidth="277.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="33.0" />
                   <TextField fx:id="txtFieldSearch" layoutX="3.0" layoutY="1.0" onKeyTyped="#handleSearch" prefHeight="32.0" prefWidth="277.0" promptText="Search" style="-fx-border-radius: 10;" />
                </children>
@@ -54,9 +40,9 @@
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <Label fx:id="lblTableName" alignment="CENTER_RIGHT" layoutX="180.0" layoutY="-1.0" prefHeight="32.0" prefWidth="480.0" textAlignment="RIGHT" textOverrun="WORD_ELLIPSIS">
+                                    <Label fx:id="lblTableName" alignment="CENTER_RIGHT" layoutX="65.0" layoutY="-1.0" prefHeight="32.0" prefWidth="595.0" textAlignment="RIGHT" textOverrun="WORD_ELLIPSIS">
                                        <font>
-                                          <Font name="Book Antiqua" size="20.0" />
+                                          <Font name="Arial Black" size="18.0" />
                                        </font>
                                        <cursor>
                                           <Cursor fx:constant="DEFAULT" />

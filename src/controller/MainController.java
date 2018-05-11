@@ -31,6 +31,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import util.Constants;
 
 public class MainController implements Initializable {
 
@@ -93,9 +94,9 @@ public class MainController implements Initializable {
 	private void onLoginClick(ActionEvent event) {
 		clearContent();
 		try {
-			Class.forName("org.postgresql.Driver");
+			Class.forName(Constants.POSTGRES_DRIVER);
 			connection = DriverManager.getConnection(
-					"jdbc:postgresql://" + txtServerUrl.getText() + ":5432/" + txtDatabase.getText(),
+					Constants.POSTGRES + txtServerUrl.getText() + Constants.DEFAULT_PORT + txtDatabase.getText(),
 					txtUsername.getText(), txtPassword.getText());
 			if (connection.isValid(0)) {
 				showTables(txtDatabase.getText());
@@ -110,8 +111,8 @@ public class MainController implements Initializable {
 
 	private void showTables(String dbName) throws SQLException {
 		metaData = connection.getMetaData();
-		String[] types = { "TABLE" };
-		ResultSet rs = metaData.getTables(null, "public", "%", types);
+		String[] types = { Constants.TABLE };
+		ResultSet rs = metaData.getTables(null, Constants.PUBLIC, "%", types);
 		ObservableList<String> tableList = FXCollections.observableArrayList();
 
 		while (rs.next()) {
@@ -131,117 +132,60 @@ public class MainController implements Initializable {
 
 			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
-				columnToTypeMap.put(columnResultSet.getString("COLUMN_NAME"), columnResultSet.getString("TYPE_NAME"));
+				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME), columnResultSet.getString(Constants.TYPE_NAME));
 			}
 			int rowIdx = 0;
 			for (Map.Entry<String, String> map : columnToTypeMap.entrySet()) {
-				if (!map.getKey().equals("id")) {
+				if (!map.getKey().equals(Constants.ID)) {
 					columnList.add(map.getKey());
 					Label label = new Label(map.getKey() + ":");
 					label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
 					GridPane.setHalignment(label, HPos.RIGHT);
 					gridPaneCreate.add(label, 0, rowIdx);
 
-					switch (map.getValue()) {
-					case "int8":
+					if (map.getValue().equalsIgnoreCase(Constants.INT4) || map.getValue().equalsIgnoreCase(Constants.INT8)
+							|| map.getValue().equalsIgnoreCase(Constants.FLOAT8)
+							|| map.getValue().equalsIgnoreCase(Constants.NUMERIC)) {
 						TextField textField = new TextField();
-						textField.setPromptText("number");
+						textField.setPromptText(Constants.NUMBER);
 						textField.setId(map.getKey());
 						GridPane.setHalignment(textField, HPos.LEFT);
 						gridPaneCreate.add(textField, 1, rowIdx);
-						break;
-					case "int4":
-						TextField textFieldInt = new TextField();
-						textFieldInt.setPromptText("number");
-						textFieldInt.setId(map.getKey());
-						GridPane.setHalignment(textFieldInt, HPos.LEFT);
-						gridPaneCreate.add(textFieldInt, 1, rowIdx);
-						break;
-					case "float8":
-						TextField textFieldFloat = new TextField();
-						textFieldFloat.setPromptText("number");
-						textFieldFloat.setId(map.getKey());
-						GridPane.setHalignment(textFieldFloat, HPos.LEFT);
-						gridPaneCreate.add(textFieldFloat, 1, rowIdx);
-						break;
-					case "numeric":
-						TextField textFieldnumeric = new TextField();
-						textFieldnumeric.setPromptText("number");
-						textFieldnumeric.setId(map.getKey());
-						GridPane.setHalignment(textFieldnumeric, HPos.LEFT);
-						gridPaneCreate.add(textFieldnumeric, 1, rowIdx);
-						break;
-					case "varchar":
+					} else if (map.getValue().equalsIgnoreCase(Constants.VARCHAR) || map.getValue().equalsIgnoreCase(Constants.CHAR)) {
 						TextField textFieldvarchar = new TextField();
-						textFieldvarchar.setPromptText("String");
+						textFieldvarchar.setPromptText(Constants.STRING);
 						textFieldvarchar.setId(map.getKey());
 						GridPane.setHalignment(textFieldvarchar, HPos.LEFT);
 						gridPaneCreate.add(textFieldvarchar, 1, rowIdx);
-						break;
-					case "text":
+					} else if (map.getValue().equalsIgnoreCase(Constants.TEXT) || map.getValue().equalsIgnoreCase(Constants.BYTEA)) {
 						TextArea textAreaText = new TextArea();
-						textAreaText.setPromptText("Text");
+						textAreaText.setPromptText(Constants.TEXT);
 						textAreaText.setId(map.getKey());
 						GridPane.setHalignment(textAreaText, HPos.LEFT);
 						gridPaneCreate.add(textAreaText, 1, rowIdx);
-						break;
-					case "char":
-						TextField textFieldchar = new TextField();
-						textFieldchar.setPromptText("String");
-						textFieldchar.setId(map.getKey());
-						GridPane.setHalignment(textFieldchar, HPos.LEFT);
-						gridPaneCreate.add(textFieldchar, 1, rowIdx);
-						break;
-					case "bytea":
-						TextArea textAreabytea = new TextArea();
-						textAreabytea.setPromptText("Text");
-						textAreabytea.setId(map.getKey());
-						GridPane.setHalignment(textAreabytea, HPos.LEFT);
-						gridPaneCreate.add(textAreabytea, 1, rowIdx);
-						break;
-					case "bool":
-						ObservableList<String> options = FXCollections.observableArrayList("", "True", "False");
+					} else if (map.getValue().equalsIgnoreCase(Constants.BOOL)) {
+						ObservableList<String> options = FXCollections.observableArrayList("", Constants.TRUE, Constants.FALSE);
 						ComboBox<String> comboBox = new ComboBox<>(options);
 						comboBox.setValue("");
 						comboBox.setId(map.getKey());
 						comboBox.setPrefWidth(150);
 						GridPane.setHalignment(comboBox, HPos.LEFT);
 						gridPaneCreate.add(comboBox, 1, rowIdx);
-						break;
-					case "date":
+					} else if (map.getValue().equalsIgnoreCase(Constants.DATE) || map.getValue().equalsIgnoreCase(Constants.TIME)
+							|| map.getValue().equalsIgnoreCase(Constants.TIMESTAMPTZ)) {
 						DatePicker datePicker = new DatePicker();
 						datePicker.setValue(LocalDate.now());
 						datePicker.setPrefWidth(150);
 						GridPane.setHalignment(datePicker, HPos.LEFT);
 						gridPaneCreate.add(datePicker, 1, rowIdx);
-						break;
-					case "time":
-						DatePicker datePickerTime = new DatePicker();
-						datePickerTime.setValue(LocalDate.now());
-						datePickerTime.setPrefWidth(150);
-						GridPane.setHalignment(datePickerTime, HPos.LEFT);
-						gridPaneCreate.add(datePickerTime, 1, rowIdx);
-						break;
-					case "timestamptz":
-						DatePicker datePickerTimestamp = new DatePicker();
-						datePickerTimestamp.setValue(LocalDate.now());
-						datePickerTimestamp.setPrefWidth(150);
-						GridPane.setHalignment(datePickerTimestamp, HPos.LEFT);
-						gridPaneCreate.add(datePickerTimestamp, 1, rowIdx);
-						break;
-					case "uuid":
+					} else if (map.getValue().equalsIgnoreCase(Constants.UUID)) {
 						TextField textFielduuid = new TextField();
 						textFielduuid.setPrefWidth(30);
-						textFielduuid.setPromptText("00000000-0000-0000-0000-000000000000");
+						textFielduuid.setPromptText(Constants.DEFAULT_UUID);
 						textFielduuid.setId(map.getKey());
 						GridPane.setHalignment(textFielduuid, HPos.LEFT);
 						gridPaneCreate.add(textFielduuid, 1, rowIdx);
-						break;
-
-					default:
-						break;
 					}
-
 					rowIdx++;
 				}
 			}
@@ -255,7 +199,7 @@ public class MainController implements Initializable {
 		if (!columnList.isEmpty()) {
 			StringBuilder columBuffer = new StringBuilder("(");
 			StringBuilder valueBuffer = new StringBuilder("(");
-			StringBuffer query = new StringBuffer(" INSERT INTO ").append(lblTableName.getText()).append(" ");
+			StringBuilder query = new StringBuilder(" INSERT INTO ").append(lblTableName.getText()).append(" ");
 			String lastColumn = columnList.get(columnList.size() - 1);
 			ObservableList<Node> childs = gridPaneCreate.getChildren();
 			for (Node node : childs) {
