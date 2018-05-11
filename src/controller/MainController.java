@@ -12,15 +12,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -132,18 +135,21 @@ public class MainController implements Initializable {
 
 			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
-				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME), columnResultSet.getString(Constants.TYPE_NAME));
+				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME),
+						columnResultSet.getString(Constants.TYPE_NAME));
 			}
 			int rowIdx = 0;
 			for (Map.Entry<String, String> map : columnToTypeMap.entrySet()) {
 				if (!map.getKey().equals(Constants.ID)) {
 					columnList.add(map.getKey());
 					Label label = new Label(map.getKey() + ":");
+					label.setId("lbl" + map.getKey());
 					label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
 					GridPane.setHalignment(label, HPos.RIGHT);
 					gridPaneCreate.add(label, 0, rowIdx);
 
-					if (map.getValue().equalsIgnoreCase(Constants.INT4) || map.getValue().equalsIgnoreCase(Constants.INT8)
+					if (map.getValue().equalsIgnoreCase(Constants.INT4)
+							|| map.getValue().equalsIgnoreCase(Constants.INT8)
 							|| map.getValue().equalsIgnoreCase(Constants.FLOAT8)
 							|| map.getValue().equalsIgnoreCase(Constants.NUMERIC)) {
 						TextField textField = new TextField();
@@ -151,40 +157,56 @@ public class MainController implements Initializable {
 						textField.setId(map.getKey());
 						GridPane.setHalignment(textField, HPos.LEFT);
 						gridPaneCreate.add(textField, 1, rowIdx);
-					} else if (map.getValue().equalsIgnoreCase(Constants.VARCHAR) || map.getValue().equalsIgnoreCase(Constants.CHAR)) {
+					} else if (map.getValue().equalsIgnoreCase(Constants.VARCHAR)
+							|| map.getValue().equalsIgnoreCase(Constants.CHAR)) {
 						TextField textFieldvarchar = new TextField();
 						textFieldvarchar.setPromptText(Constants.STRING);
 						textFieldvarchar.setId(map.getKey());
 						GridPane.setHalignment(textFieldvarchar, HPos.LEFT);
 						gridPaneCreate.add(textFieldvarchar, 1, rowIdx);
-					} else if (map.getValue().equalsIgnoreCase(Constants.TEXT) || map.getValue().equalsIgnoreCase(Constants.BYTEA)) {
+					} else if (map.getValue().equalsIgnoreCase(Constants.TEXT)
+							|| map.getValue().equalsIgnoreCase(Constants.BYTEA)) {
 						TextArea textAreaText = new TextArea();
 						textAreaText.setPromptText(Constants.TEXT);
 						textAreaText.setId(map.getKey());
 						GridPane.setHalignment(textAreaText, HPos.LEFT);
 						gridPaneCreate.add(textAreaText, 1, rowIdx);
 					} else if (map.getValue().equalsIgnoreCase(Constants.BOOL)) {
-						ObservableList<String> options = FXCollections.observableArrayList("", Constants.TRUE, Constants.FALSE);
+						ObservableList<String> options = FXCollections.observableArrayList("", Constants.TRUE,
+								Constants.FALSE);
 						ComboBox<String> comboBox = new ComboBox<>(options);
 						comboBox.setValue("");
 						comboBox.setId(map.getKey());
 						comboBox.setPrefWidth(150);
 						GridPane.setHalignment(comboBox, HPos.LEFT);
 						gridPaneCreate.add(comboBox, 1, rowIdx);
-					} else if (map.getValue().equalsIgnoreCase(Constants.DATE) || map.getValue().equalsIgnoreCase(Constants.TIME)
+					} else if (map.getValue().equalsIgnoreCase(Constants.DATE)
+							|| map.getValue().equalsIgnoreCase(Constants.TIME)
 							|| map.getValue().equalsIgnoreCase(Constants.TIMESTAMPTZ)) {
 						DatePicker datePicker = new DatePicker();
 						datePicker.setValue(LocalDate.now());
+						datePicker.setId(map.getKey());
 						datePicker.setPrefWidth(150);
 						GridPane.setHalignment(datePicker, HPos.LEFT);
 						gridPaneCreate.add(datePicker, 1, rowIdx);
 					} else if (map.getValue().equalsIgnoreCase(Constants.UUID)) {
 						TextField textFielduuid = new TextField();
+						Button autoGenBtn = new Button("Generate");
+						autoGenBtn.setId("btn" + map.getKey());
+						autoGenBtn.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent e) {
+								UUID randomUUId = UUID.randomUUID();
+								textFielduuid.setText(randomUUId.toString());
+							}
+						});
 						textFielduuid.setPrefWidth(30);
 						textFielduuid.setPromptText(Constants.DEFAULT_UUID);
 						textFielduuid.setId(map.getKey());
 						GridPane.setHalignment(textFielduuid, HPos.LEFT);
+						GridPane.setHalignment(autoGenBtn, HPos.RIGHT);
 						gridPaneCreate.add(textFielduuid, 1, rowIdx);
+						gridPaneCreate.add(autoGenBtn, 1, ++rowIdx);
 					}
 					rowIdx++;
 				}
@@ -202,19 +224,63 @@ public class MainController implements Initializable {
 			StringBuilder query = new StringBuilder(" INSERT INTO ").append(lblTableName.getText()).append(" ");
 			String lastColumn = columnList.get(columnList.size() - 1);
 			ObservableList<Node> childs = gridPaneCreate.getChildren();
-			for (Node node : childs) {
+			List<Node> filteredChilds = childs.stream().filter(c -> !(c instanceof Label) && !(c instanceof Button))
+					.collect(Collectors.toList());
+			for (Node node : filteredChilds) {
 				for (String column : columnList) {
-					if (node instanceof TextField && node.getId().equals(column)) {
-						TextField textField = (TextField) node;
-						String text = textField.getText();
-						String columnName = textField.getId();
-						columBuffer.append(columnName);
-						valueBuffer.append(text);
-						if (!column.equals(lastColumn)) {
-							columBuffer.append(", ");
-							valueBuffer.append(", ");
+					if (node.getId().equals(column)) {
+						// Text Field
+						if (node instanceof TextField) {
+							TextField textField = (TextField) node;
+							String text = textField.getText();
+							String columnName = textField.getId();
+							columBuffer.append(columnName);
+							valueBuffer.append("'" + text + "'");
+							if (!column.equals(lastColumn)) {
+								columBuffer.append(", ");
+								valueBuffer.append(", ");
+							}
+							break;
+						} // Text
+						else if (node instanceof TextArea) {
+							TextArea textArea = (TextArea) node;
+							String text = textArea.getText();
+							String columnName = textArea.getId();
+							columBuffer.append(columnName);
+							valueBuffer.append("'" + text + "'");
+							if (!column.equals(lastColumn)) {
+								columBuffer.append(", ");
+								valueBuffer.append(", ");
+							}
+							break;
+						} // Combobox
+						else if (node instanceof ComboBox<?>) {
+							ComboBox<?> comboBox = (ComboBox<?>) node;
+							String text = comboBox.getValue().toString();
+							String columnName = comboBox.getId();
+							columBuffer.append(columnName);
+							valueBuffer.append(text);
+							if (!column.equals(lastColumn)) {
+								columBuffer.append(", ");
+								valueBuffer.append(", ");
+							}
+							break;
+						} // Date Picker
+						else if (node instanceof DatePicker) {
+							DatePicker datePicker = (DatePicker) node;
+							LocalDate value = datePicker.getValue();
+							String date = value.toString();
+							String columnName = datePicker.getId();
+							columBuffer.append(columnName);
+							valueBuffer.append("'" + date + "'");
+							if (!column.equals(lastColumn)) {
+								columBuffer.append(", ");
+								valueBuffer.append(", ");
+							}
+							break;
+
 						}
-						break;
+
 					}
 				}
 			}
@@ -225,6 +291,7 @@ public class MainController implements Initializable {
 			for (Node node : anchorChilds) {
 				if (node instanceof TextArea) {
 					TextArea area = (TextArea) node;
+					area.setWrapText(true);
 					area.setText(query.toString());
 				}
 			}
@@ -251,4 +318,20 @@ public class MainController implements Initializable {
 		listTableNames.setItems(filteredList);
 	}
 
+	@FXML
+	private void onClear(ActionEvent event) {
+		ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
+		for (Node node : anchorChilds) {
+			if (node instanceof TextArea) {
+				TextArea area = (TextArea) node;
+				area.setText("");
+			}
+		}
+	}
+
+	@FXML
+	private void onReset(ActionEvent event) {
+		gridPaneCreate.getChildren().clear();
+		showColumns(listTableNames.getSelectionModel().getSelectedItem());
+	}
 }
