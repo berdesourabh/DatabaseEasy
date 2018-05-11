@@ -16,13 +16,13 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="846.0" prefWidth="969.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+<AnchorPane prefHeight="846.0" prefWidth="1034.0" xmlns="http://javafx.com/javafx/9.0.4" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
    <children>
-      <TextField fx:id="txtUsername" layoutX="23.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Username" text="viewtrust" />
-      <TextField fx:id="txtPassword" layoutX="215.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Password" text="Password1" />
-      <TextField fx:id="txtServerUrl" layoutX="420.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Server Url" text="10.100.248.5" />
-      <TextField fx:id="txtDatabase" layoutX="631.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Database" text="viewtrust_dev1" />
-      <Button fx:id="btnLogin" layoutX="853.0" layoutY="35.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" style="-fx-border-radius: 15px;" text="Login" />
+      <TextField fx:id="txtUsername" layoutX="84.0" layoutY="36.0" prefHeight="26.0" prefWidth="138.0" promptText="Username" text="postgres" />
+      <TextField fx:id="txtPassword" layoutX="292.0" layoutY="35.0" prefHeight="26.0" prefWidth="138.0" promptText="Password" text="postgres" />
+      <TextField fx:id="txtServerUrl" layoutX="499.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Server Url" text="localhost" />
+      <TextField fx:id="txtDatabase" layoutX="701.0" layoutY="37.0" prefHeight="26.0" prefWidth="138.0" promptText="Database" text="postgres" />
+      <Button fx:id="btnLogin" layoutX="934.0" layoutY="34.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="76.0" style="-fx-border-radius: 15px;" text="Login" />
       <Label fx:id="lblError" layoutX="23.0" layoutY="73.0" prefHeight="26.0" prefWidth="830.0" textFill="#f20f0f" />
       <SplitPane fx:id="splitPaneRoot" dividerPositions="0.29083094555873923" layoutY="105.0" prefHeight="595.0" prefWidth="854.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="105.0">
         <items>
@@ -50,9 +50,9 @@
                                     </Label>
                                     <AnchorPane fx:id="anchorPaneCreate" layoutX="14.0" layoutY="33.0" prefHeight="685.0" prefWidth="602.0" AnchorPane.bottomAnchor="-13.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="-14.0" AnchorPane.topAnchor="33.0">
                                        <children>
-                                          <ScrollPane fx:id="createScrollPane" layoutX="-16.0" layoutY="-1.0" prefHeight="554.0" prefWidth="684.0" AnchorPane.bottomAnchor="136.0" AnchorPane.leftAnchor="-16.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.0">
+                                          <ScrollPane fx:id="createScrollPane" layoutX="-4.0" layoutY="-1.0" prefHeight="524.0" prefWidth="716.0" AnchorPane.bottomAnchor="162.0" AnchorPane.leftAnchor="-4.0" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="0.0">
                                              <content>
-                                                <GridPane fx:id="gridPaneCreate" hgap="100.0" onInputMethodTextChanged="#handleSearch" prefHeight="74.0" prefWidth="614.0" style="-fx-border-radius: 15px;" vgap="20.0">
+                                                <GridPane fx:id="gridPaneCreate" hgap="100.0" onInputMethodTextChanged="#handleSearch" prefHeight="74.0" prefWidth="667.0" style="-fx-border-radius: 15px;" vgap="20.0">
                                                   <columnConstraints>
                                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="370.0" minWidth="50.0" prefWidth="263.673095703125" />
                                                     <ColumnConstraints hgrow="SOMETIMES" maxWidth="261.48309326171875" minWidth="10.0" prefWidth="250.326904296875" />
@@ -63,8 +63,10 @@
                                                 </GridPane>
                                              </content>
                                           </ScrollPane>
-                                          <Button fx:id="btnCreateSubmit" layoutX="523.0" layoutY="594.0" mnemonicParsing="false" onAction="#onCreateSubmit" prefHeight="27.0" prefWidth="129.0" text="Submit" />
-                                          <TextArea fx:id="txtAreaQuery" layoutX="-16.0" layoutY="562.0" prefHeight="103.0" prefWidth="504.0" />
+                                          <Button fx:id="btnCreateSubmit" layoutX="504.0" layoutY="634.0" mnemonicParsing="false" onAction="#onCreateSubmit" prefHeight="27.0" prefWidth="100.0" text="Submit" />
+                                          <TextArea fx:id="txtAreaQuery" layoutX="-4.0" layoutY="546.0" prefHeight="119.0" prefWidth="492.0" />
+                                          <Button fx:id="btnCreateClear" layoutX="615.0" layoutY="634.0" mnemonicParsing="false" onAction="#onClear" prefHeight="27.0" prefWidth="87.0" text="Clear" />
+                                          <Button fx:id="btnCreateReset" layoutX="617.0" layoutY="531.0" mnemonicParsing="false" onAction="#onReset" prefHeight="27.0" prefWidth="82.0" text="Reset" />
                                        </children>
                                     </AnchorPane>
                                  </children></AnchorPane>
