@@ -144,7 +144,7 @@ public class MainController implements Initializable {
 					columnList.add(map.getKey());
 					Label label = new Label(map.getKey() + ":");
 					label.setId("lbl" + map.getKey());
-					label.setStyle("-fx-font-size:20px;-fx-font-weight: bold;");
+					label.setStyle("-fx-font-size:20px;");
 					GridPane.setHalignment(label, HPos.RIGHT);
 					gridPaneCreate.add(label, 0, rowIdx);
 
@@ -154,7 +154,7 @@ public class MainController implements Initializable {
 							|| map.getValue().equalsIgnoreCase(Constants.NUMERIC)) {
 						TextField textField = new TextField();
 						textField.setPromptText(Constants.NUMBER);
-						textField.setId(map.getKey());
+						textField.setId("number" + map.getKey());
 						GridPane.setHalignment(textField, HPos.LEFT);
 						gridPaneCreate.add(textField, 1, rowIdx);
 					} else if (map.getValue().equalsIgnoreCase(Constants.VARCHAR)
@@ -172,10 +172,10 @@ public class MainController implements Initializable {
 						GridPane.setHalignment(textAreaText, HPos.LEFT);
 						gridPaneCreate.add(textAreaText, 1, rowIdx);
 					} else if (map.getValue().equalsIgnoreCase(Constants.BOOL)) {
-						ObservableList<String> options = FXCollections.observableArrayList("", Constants.TRUE,
+						ObservableList<String> options = FXCollections.observableArrayList(Constants.TRUE,
 								Constants.FALSE);
 						ComboBox<String> comboBox = new ComboBox<>(options);
-						comboBox.setValue("");
+						comboBox.setValue(Constants.TRUE);
 						comboBox.setId(map.getKey());
 						comboBox.setPrefWidth(150);
 						GridPane.setHalignment(comboBox, HPos.LEFT);
@@ -218,83 +218,86 @@ public class MainController implements Initializable {
 
 	@FXML
 	public void onCreateSubmit(ActionEvent event) {
-		if (!columnList.isEmpty()) {
-			StringBuilder columBuffer = new StringBuilder("(");
-			StringBuilder valueBuffer = new StringBuilder("(");
-			StringBuilder query = new StringBuilder(" INSERT INTO ").append(lblTableName.getText()).append(" ");
-			String lastColumn = columnList.get(columnList.size() - 1);
-			ObservableList<Node> childs = gridPaneCreate.getChildren();
-			List<Node> filteredChilds = childs.stream().filter(c -> !(c instanceof Label) && !(c instanceof Button))
-					.collect(Collectors.toList());
-			for (Node node : filteredChilds) {
-				for (String column : columnList) {
-					if (node.getId().equals(column)) {
-						// Text Field
-						if (node instanceof TextField) {
-							TextField textField = (TextField) node;
-							String text = textField.getText();
-							String columnName = textField.getId();
-							columBuffer.append(columnName);
-							valueBuffer.append("'" + text + "'");
-							if (!column.equals(lastColumn)) {
-								columBuffer.append(", ");
-								valueBuffer.append(", ");
+		try {
+			if (!columnList.isEmpty()) {
+				StringBuilder columBuffer = new StringBuilder("(");
+				StringBuilder valueBuffer = new StringBuilder("(");
+				StringBuilder query = new StringBuilder(" INSERT INTO ").append(lblTableName.getText()).append(" ");
+				String lastColumn = columnList.get(columnList.size() - 1);
+				ObservableList<Node> childs = gridPaneCreate.getChildren();
+				List<Node> filteredChilds = childs.stream().filter(c -> !(c instanceof Label) && !(c instanceof Button))
+						.collect(Collectors.toList());
+				for (Node node : filteredChilds) {
+					for (String column : columnList) {
+						if (node.getId().contains("number") ? node.getId().contains(column)
+								: node.getId().equals(column)) {
+							// Text Field
+							if (node instanceof TextField) {
+								TextField textField = (TextField) node;
+								String text = textField.getText();
+								columBuffer.append(column);
+								if (textField.getId().contains("number")) {
+									valueBuffer.append(text);
+								} else {
+									valueBuffer.append("'" + text + "'");
+								}
+								if (!column.equals(lastColumn)) {
+									columBuffer.append(", ");
+									valueBuffer.append(", ");
+								}
+								break;
+							} // Text
+							else if (node instanceof TextArea) {
+								TextArea textArea = (TextArea) node;
+								String text = textArea.getText();
+								columBuffer.append(column);
+								valueBuffer.append("'" + text + "'");
+								if (!column.equals(lastColumn)) {
+									columBuffer.append(", ");
+									valueBuffer.append(", ");
+								}
+								break;
+							} // Combobox
+							else if (node instanceof ComboBox<?>) {
+								ComboBox<?> comboBox = (ComboBox<?>) node;
+								String text = comboBox.getValue().toString();
+								columBuffer.append(column);
+								valueBuffer.append(text);
+								if (!column.equals(lastColumn)) {
+									columBuffer.append(", ");
+									valueBuffer.append(", ");
+								}
+								break;
+							} // Date Picker
+							else if (node instanceof DatePicker) {
+								DatePicker datePicker = (DatePicker) node;
+								LocalDate value = datePicker.getValue();
+								String date = value.toString();
+								columBuffer.append(column);
+								valueBuffer.append("'" + date + "'");
+								if (!column.equals(lastColumn)) {
+									columBuffer.append(", ");
+									valueBuffer.append(", ");
+								}
+								break;
 							}
-							break;
-						} // Text
-						else if (node instanceof TextArea) {
-							TextArea textArea = (TextArea) node;
-							String text = textArea.getText();
-							String columnName = textArea.getId();
-							columBuffer.append(columnName);
-							valueBuffer.append("'" + text + "'");
-							if (!column.equals(lastColumn)) {
-								columBuffer.append(", ");
-								valueBuffer.append(", ");
-							}
-							break;
-						} // Combobox
-						else if (node instanceof ComboBox<?>) {
-							ComboBox<?> comboBox = (ComboBox<?>) node;
-							String text = comboBox.getValue().toString();
-							String columnName = comboBox.getId();
-							columBuffer.append(columnName);
-							valueBuffer.append(text);
-							if (!column.equals(lastColumn)) {
-								columBuffer.append(", ");
-								valueBuffer.append(", ");
-							}
-							break;
-						} // Date Picker
-						else if (node instanceof DatePicker) {
-							DatePicker datePicker = (DatePicker) node;
-							LocalDate value = datePicker.getValue();
-							String date = value.toString();
-							String columnName = datePicker.getId();
-							columBuffer.append(columnName);
-							valueBuffer.append("'" + date + "'");
-							if (!column.equals(lastColumn)) {
-								columBuffer.append(", ");
-								valueBuffer.append(", ");
-							}
-							break;
-
 						}
-
+					}
+				}
+				columBuffer.append(" )");
+				valueBuffer.append(" )");
+				query.append(columBuffer).append(" VALUES ").append(valueBuffer);
+				ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
+				for (Node node : anchorChilds) {
+					if (node instanceof TextArea) {
+						TextArea area = (TextArea) node;
+						area.setWrapText(true);
+						area.setText(query.toString());
 					}
 				}
 			}
-			columBuffer.append(" )");
-			valueBuffer.append(" )");
-			query.append(columBuffer).append(" VALUES ").append(valueBuffer);
-			ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-			for (Node node : anchorChilds) {
-				if (node instanceof TextArea) {
-					TextArea area = (TextArea) node;
-					area.setWrapText(true);
-					area.setText(query.toString());
-				}
-			}
+		} catch (Exception ex) {
+			lblError.setText(ex.getMessage());
 		}
 	}
 
