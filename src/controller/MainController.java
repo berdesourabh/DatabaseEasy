@@ -17,6 +17,8 @@ import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.sun.xml.internal.ws.addressing.model.InvalidAddressingHeaderException;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -41,6 +43,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import util.ComponentUtil;
 import util.Constants;
 
 public class MainController implements Initializable {
@@ -85,6 +88,8 @@ public class MainController implements Initializable {
 	private List<String> fixedTableList = new ArrayList<>();
 
 	private List<String> columnList = new ArrayList<>();
+
+	private List<String> notNullColumns = new ArrayList<>();
 
 	@FXML
 	private ScrollPane createScrollPane;
@@ -140,7 +145,7 @@ public class MainController implements Initializable {
 		try {
 			lblTableName.setText(selectedTable);
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
-			List<String> notNullColumns = getNullConstraintColumns(selectedTable);
+			notNullColumns = ComponentUtil.getNullConstraintColumns(selectedTable, connection);
 			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
 				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME),
@@ -154,7 +159,7 @@ public class MainController implements Initializable {
 					if (notNullColumns.contains(map.getKey())) {
 						Text astric = new Text("*");
 						astric.setFill(Color.RED);
-						label = new Label(map.getKey()+"  ");
+						label = new Label(map.getKey() + "  ");
 						label.setId("lbl" + map.getKey());
 						label.setStyle("-fx-font-size:20px;");
 						GridPane.setHalignment(label, HPos.RIGHT);
@@ -168,7 +173,6 @@ public class MainController implements Initializable {
 						GridPane.setHalignment(label, HPos.RIGHT);
 						gridPaneCreate.add(label, 0, rowIdx);
 					}
-					
 
 					if (map.getValue().equalsIgnoreCase(Constants.INT4)
 							|| map.getValue().equalsIgnoreCase(Constants.INT8)
@@ -176,7 +180,7 @@ public class MainController implements Initializable {
 							|| map.getValue().equalsIgnoreCase(Constants.NUMERIC)) {
 						TextField textField = new TextField();
 						textField.setPromptText(Constants.NUMBER);
-						textField.setId("int" + map.getKey());
+						textField.setId(Constants.INT + map.getKey());
 						GridPane.setHalignment(textField, HPos.LEFT);
 						gridPaneCreate.add(textField, 1, rowIdx);
 					} else if (map.getValue().equalsIgnoreCase(Constants.VARCHAR)
@@ -247,18 +251,21 @@ public class MainController implements Initializable {
 				StringBuilder query = new StringBuilder(" INSERT INTO ").append(lblTableName.getText()).append(" ");
 				String lastColumn = columnList.get(columnList.size() - 1);
 				ObservableList<Node> childs = gridPaneCreate.getChildren();
-				List<Node> filteredChilds = childs.stream().filter(c -> !(c instanceof Label) && !(c instanceof Button) && !(c instanceof Text))
+				List<Node> filteredChilds = childs.stream()
+						.filter(c -> !(c instanceof Label) && !(c instanceof Button) && !(c instanceof Text))
 						.collect(Collectors.toList());
 				for (Node node : filteredChilds) {
 					for (String column : columnList) {
-						if (node.getId().contains("int") ? node.getId().contains(column)
+						if (node.getId().contains(Constants.INT) ? node.getId().contains(column)
 								: node.getId().equals(column)) {
 							// Text Field
 							if (node instanceof TextField) {
 								TextField textField = (TextField) node;
 								String text = textField.getText().equalsIgnoreCase("") ? null : textField.getText();
 								columBuffer.append(column);
-								if (textField.getId().contains("int") || text == null) {
+								if (!(ComponentUtil.validateNotNull(column, notNullColumns, text)))
+									throw new IllegalArgumentException(Constants.MANDETORY_FIELD_MESSAGE);
+								if (textField.getId().contains(Constants.INT) || text == null) {
 									valueBuffer.append(text);
 								} else {
 									valueBuffer.append("'" + text + "'");
@@ -272,6 +279,8 @@ public class MainController implements Initializable {
 							else if (node instanceof TextArea) {
 								TextArea textArea = (TextArea) node;
 								String text = textArea.getText().equalsIgnoreCase("") ? null : textArea.getText();
+								if (!(ComponentUtil.validateNotNull(column, notNullColumns, text)))
+									throw new IllegalArgumentException(Constants.MANDETORY_FIELD_MESSAGE);
 								columBuffer.append(column);
 								if (text == null) {
 									valueBuffer.append(text);
@@ -323,7 +332,10 @@ public class MainController implements Initializable {
 				}
 			}
 		} catch (Exception ex) {
-			lblError.setText(ex.getMessage());
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle(Constants.ALERT);
+			alert.setHeaderText(ex.getMessage());
+			alert.showAndWait();
 		}
 	}
 
@@ -361,8 +373,8 @@ public class MainController implements Initializable {
 	@FXML
 	private void onReset(ActionEvent event) {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Alert");
-		alert.setHeaderText("Do you want to reset all fileds?");
+		alert.setTitle(Constants.ALERT);
+		alert.setHeaderText(Constants.RESET_MESSAGE);
 		Optional<ButtonType> result = alert.showAndWait();
 		if (result.get() == ButtonType.OK) {
 			gridPaneCreate.getChildren().clear();
@@ -371,17 +383,4 @@ public class MainController implements Initializable {
 
 	}
 
-	private List<String> getNullConstraintColumns(String selectedTable) throws SQLException {
-		List<String> columnNames = new ArrayList<>();
-		PreparedStatement st = connection.prepareStatement(
-				"SELECT column_name FROM  INFORMATION_SCHEMA.COLUMNS where table_name = ? and is_nullable = 'NO'");
-		st.setString(1, selectedTable);
-		ResultSet rs = st.executeQuery();
-		while (rs.next()) {
-			columnNames.add(rs.getString("column_name"));
-
-		}
-		return columnNames;
-
-	}
 }
