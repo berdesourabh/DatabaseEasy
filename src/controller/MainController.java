@@ -247,7 +247,7 @@ public class MainController implements Initializable {
 				StringBuilder query = new StringBuilder(" INSERT INTO ").append(lblTableName.getText()).append(" ");
 				String lastColumn = columnList.get(columnList.size() - 1);
 				ObservableList<Node> childs = gridPaneCreate.getChildren();
-				List<Node> filteredChilds = childs.stream().filter(c -> !(c instanceof Label) && !(c instanceof Button))
+				List<Node> filteredChilds = childs.stream().filter(c -> !(c instanceof Label) && !(c instanceof Button) && !(c instanceof Text))
 						.collect(Collectors.toList());
 				for (Node node : filteredChilds) {
 					for (String column : columnList) {
@@ -374,7 +374,7 @@ public class MainController implements Initializable {
 	private List<String> getNullConstraintColumns(String selectedTable) throws SQLException {
 		List<String> columnNames = new ArrayList<>();
 		PreparedStatement st = connection.prepareStatement(
-				"SELECT column_name FROM    INFORMATION_SCHEMA.COLUMNS where table_name = ? and is_nullable = 'NO'");
+				"SELECT column_name FROM  INFORMATION_SCHEMA.COLUMNS where table_name = ? and is_nullable = 'NO'");
 		st.setString(1, selectedTable);
 		ResultSet rs = st.executeQuery();
 		while (rs.next()) {
