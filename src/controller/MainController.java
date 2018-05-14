@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,7 +24,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -235,7 +239,8 @@ public class MainController implements Initializable {
 							// Text Field
 							if (node instanceof TextField) {
 								TextField textField = (TextField) node;
-								String text = textField.getText().equalsIgnoreCase("") ? null : textField.getText();;
+								String text = textField.getText().equalsIgnoreCase("") ? null : textField.getText();
+								;
 								columBuffer.append(column);
 								if (textField.getId().contains("int")) {
 									valueBuffer.append(text);
@@ -335,7 +340,14 @@ public class MainController implements Initializable {
 
 	@FXML
 	private void onReset(ActionEvent event) {
-		gridPaneCreate.getChildren().clear();
-		showColumns(listTableNames.getSelectionModel().getSelectedItem());
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Alert");
+		alert.setHeaderText("Do you want to reset all fileds?");
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK) {
+			gridPaneCreate.getChildren().clear();
+			showColumns(listTableNames.getSelectionModel().getSelectedItem());
+		}
+
 	}
 }
