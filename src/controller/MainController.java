@@ -5,7 +5,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -35,12 +37,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import util.Constants;
+import util.IdandValuePair;
 
 public class MainController implements Initializable {
 
 	private Connection connection;
 
 	private DatabaseMetaData metaData;
+
 	@FXML
 	public TextField txtUsername;
 
@@ -78,6 +82,9 @@ public class MainController implements Initializable {
 	private List<String> fixedTableList = new ArrayList<>();
 
 	private List<String> columnList = new ArrayList<>();
+
+	@FXML
+	private TextArea txtAreaQuery;
 
 	@FXML
 	private ScrollPane createScrollPane;
@@ -130,9 +137,18 @@ public class MainController implements Initializable {
 	public void showColumns(String selectedTable) {
 
 		try {
+			LinkedHashMap<String, String> foreignTableAndColumnMap = new LinkedHashMap<>();
+			List<String> foreignColumns = new ArrayList<>();
 			lblTableName.setText(selectedTable);
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
-
+			ResultSet fkrs = metaData.getCrossReference(null,null, selectedTable,
+					null, null, "Department");
+			ResultSetMetaData rsmd = fkrs.getMetaData();
+			while (fkrs.next()) {
+				foreignTableAndColumnMap.put(fkrs.getString(Constants.FOREIGN_KEY_COLUMN),
+						fkrs.getString(Constants.FOREIGN_KEY_TABLE));
+				foreignColumns.add(fkrs.getString(Constants.FOREIGN_KEY_COLUMN));
+			}
 			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
 				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME),
@@ -152,6 +168,10 @@ public class MainController implements Initializable {
 							|| map.getValue().equalsIgnoreCase(Constants.INT8)
 							|| map.getValue().equalsIgnoreCase(Constants.FLOAT8)
 							|| map.getValue().equalsIgnoreCase(Constants.NUMERIC)) {
+						if (foreignColumns.contains(map.getKey())) {
+							List<IdandValuePair> pairList = getForeignKeyData(
+									foreignTableAndColumnMap.get(map.getKey()));
+						}
 						TextField textField = new TextField();
 						textField.setPromptText(Constants.NUMBER);
 						textField.setId("number" + map.getKey());
@@ -287,14 +307,7 @@ public class MainController implements Initializable {
 				columBuffer.append(" )");
 				valueBuffer.append(" )");
 				query.append(columBuffer).append(" VALUES ").append(valueBuffer);
-				ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-				for (Node node : anchorChilds) {
-					if (node instanceof TextArea) {
-						TextArea area = (TextArea) node;
-						area.setWrapText(true);
-						area.setText(query.toString());
-					}
-				}
+				txtAreaQuery.setText(query.toString());
 			}
 		} catch (Exception ex) {
 			lblError.setText(ex.getMessage());
@@ -323,18 +336,27 @@ public class MainController implements Initializable {
 
 	@FXML
 	private void onClear(ActionEvent event) {
-		ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-		for (Node node : anchorChilds) {
-			if (node instanceof TextArea) {
-				TextArea area = (TextArea) node;
-				area.setText("");
-			}
-		}
+		txtAreaQuery.setText("");
 	}
 
 	@FXML
-	private void onReset(ActionEvent event) {
+	private void onReset(ActionEvent event) throws SQLException {
 		gridPaneCreate.getChildren().clear();
 		showColumns(listTableNames.getSelectionModel().getSelectedItem());
+	}
+
+	private List<IdandValuePair> getForeignKeyData(String tableName) throws SQLException {
+		List<IdandValuePair> idAndValuePairList = new ArrayList<>();
+		Statement st = connection.createStatement();
+		String newTablename = "\"" + tableName + "\"";
+		ResultSet queryResult = st.executeQuery("SELECT * from public." + newTablename);
+
+		while (queryResult.next()) {
+			IdandValuePair idAndValue = new IdandValuePair();
+			idAndValue.setId(queryResult.getLong("id"));
+			idAndValue.setName(queryResult.getString("name"));
+			idAndValuePairList.add(idAndValue);
+		}
+		return idAndValuePairList;
 	}
 }

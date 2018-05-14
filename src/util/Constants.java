@@ -53,5 +53,9 @@ public interface Constants {
 	public static final String POSTGRES = "jdbc:postgresql://";
 	
 	public static final String POSTGRES_DRIVER = "org.postgresql.Driver";
+	
+	public static final String FOREIGN_KEY_COLUMN = "FKCOLUMN_NAME";
+	
+	public static final String FOREIGN_KEY_TABLE = "FKTABLE_NAME";
 
 }
