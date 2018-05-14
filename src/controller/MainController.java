@@ -235,7 +235,7 @@ public class MainController implements Initializable {
 							// Text Field
 							if (node instanceof TextField) {
 								TextField textField = (TextField) node;
-								String text = textField.getText();
+								String text = textField.getText().equalsIgnoreCase("") ? null : textField.getText();;
 								columBuffer.append(column);
 								if (textField.getId().contains("number")) {
 									valueBuffer.append(text);
@@ -250,7 +250,7 @@ public class MainController implements Initializable {
 							} // Text
 							else if (node instanceof TextArea) {
 								TextArea textArea = (TextArea) node;
-								String text = textArea.getText();
+								String text = textArea.getText().equalsIgnoreCase("") ? null : textArea.getText();
 								columBuffer.append(column);
 								valueBuffer.append("'" + text + "'");
 								if (!column.equals(lastColumn)) {
