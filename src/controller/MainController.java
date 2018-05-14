@@ -155,7 +155,7 @@ public class MainController implements Initializable {
 							|| map.getValue().equalsIgnoreCase(Constants.NUMERIC)) {
 						TextField textField = new TextField();
 						textField.setPromptText(Constants.NUMBER);
-						textField.setId("number" + map.getKey());
+						textField.setId("int" + map.getKey());
 						GridPane.setHalignment(textField, HPos.LEFT);
 						gridPaneCreate.add(textField, 1, rowIdx);
 					} else if (map.getValue().equalsIgnoreCase(Constants.VARCHAR)
@@ -230,14 +230,14 @@ public class MainController implements Initializable {
 						.collect(Collectors.toList());
 				for (Node node : filteredChilds) {
 					for (String column : columnList) {
-						if (node.getId().contains("number") ? node.getId().contains(column)
+						if (node.getId().contains("int") ? node.getId().contains(column)
 								: node.getId().equals(column)) {
 							// Text Field
 							if (node instanceof TextField) {
 								TextField textField = (TextField) node;
 								String text = textField.getText().equalsIgnoreCase("") ? null : textField.getText();;
 								columBuffer.append(column);
-								if (textField.getId().contains("number")) {
+								if (textField.getId().contains("int")) {
 									valueBuffer.append(text);
 								} else {
 									valueBuffer.append("'" + text + "'");
