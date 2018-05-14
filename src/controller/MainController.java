@@ -137,7 +137,6 @@ public class MainController implements Initializable {
 		try {
 			lblTableName.setText(selectedTable);
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
-
 			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
 				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME),
@@ -240,9 +239,8 @@ public class MainController implements Initializable {
 							if (node instanceof TextField) {
 								TextField textField = (TextField) node;
 								String text = textField.getText().equalsIgnoreCase("") ? null : textField.getText();
-								;
 								columBuffer.append(column);
-								if (textField.getId().contains("int")) {
+								if (textField.getId().contains("int") || text == null) {
 									valueBuffer.append(text);
 								} else {
 									valueBuffer.append("'" + text + "'");
@@ -257,7 +255,11 @@ public class MainController implements Initializable {
 								TextArea textArea = (TextArea) node;
 								String text = textArea.getText().equalsIgnoreCase("") ? null : textArea.getText();
 								columBuffer.append(column);
-								valueBuffer.append("'" + text + "'");
+								if (text == null) {
+									valueBuffer.append(text);
+								} else {
+									valueBuffer.append("'" + text + "'");
+								}
 								if (!column.equals(lastColumn)) {
 									columBuffer.append(", ");
 									valueBuffer.append(", ");
