@@ -4,6 +4,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -38,6 +39,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import util.Constants;
 
 public class MainController implements Initializable {
@@ -137,6 +140,7 @@ public class MainController implements Initializable {
 		try {
 			lblTableName.setText(selectedTable);
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
+			List<String> notNullColumns = getNullConstraintColumns(selectedTable);
 			LinkedHashMap<String, String> columnToTypeMap = new LinkedHashMap<>();
 			while (columnResultSet.next()) {
 				columnToTypeMap.put(columnResultSet.getString(Constants.COLUMN_NAME),
@@ -146,11 +150,25 @@ public class MainController implements Initializable {
 			for (Map.Entry<String, String> map : columnToTypeMap.entrySet()) {
 				if (!map.getKey().equals(Constants.ID)) {
 					columnList.add(map.getKey());
-					Label label = new Label(map.getKey() + ":");
-					label.setId("lbl" + map.getKey());
-					label.setStyle("-fx-font-size:20px;");
-					GridPane.setHalignment(label, HPos.RIGHT);
-					gridPaneCreate.add(label, 0, rowIdx);
+					Label label = null;
+					if (notNullColumns.contains(map.getKey())) {
+						Text astric = new Text("*");
+						astric.setFill(Color.RED);
+						label = new Label(map.getKey()+"  ");
+						label.setId("lbl" + map.getKey());
+						label.setStyle("-fx-font-size:20px;");
+						GridPane.setHalignment(label, HPos.RIGHT);
+						GridPane.setHalignment(astric, HPos.RIGHT);
+						gridPaneCreate.add(label, 0, rowIdx);
+						gridPaneCreate.add(astric, 0, rowIdx);
+					} else {
+						label = new Label(map.getKey());
+						label.setId("lbl" + map.getKey());
+						label.setStyle("-fx-font-size:20px;");
+						GridPane.setHalignment(label, HPos.RIGHT);
+						gridPaneCreate.add(label, 0, rowIdx);
+					}
+					
 
 					if (map.getValue().equalsIgnoreCase(Constants.INT4)
 							|| map.getValue().equalsIgnoreCase(Constants.INT8)
@@ -350,6 +368,20 @@ public class MainController implements Initializable {
 			gridPaneCreate.getChildren().clear();
 			showColumns(listTableNames.getSelectionModel().getSelectedItem());
 		}
+
+	}
+
+	private List<String> getNullConstraintColumns(String selectedTable) throws SQLException {
+		List<String> columnNames = new ArrayList<>();
+		PreparedStatement st = connection.prepareStatement(
+				"SELECT column_name FROM    INFORMATION_SCHEMA.COLUMNS where table_name = ? and is_nullable = 'NO'");
+		st.setString(1, selectedTable);
+		ResultSet rs = st.executeQuery();
+		while (rs.next()) {
+			columnNames.add(rs.getString("column_name"));
+
+		}
+		return columnNames;
 
 	}
 }
