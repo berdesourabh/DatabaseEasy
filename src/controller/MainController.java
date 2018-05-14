@@ -123,6 +123,7 @@ public class MainController implements Initializable {
 		}
 		fixedTableList.addAll(tableList);
 		listTableNames.getItems().addAll(tableList);
+		listTableNames.setStyle("-fx-font-size:16px;-fx-font-weight:bold;");
 		lblMainDBName.setText(dbName);
 
 	}
