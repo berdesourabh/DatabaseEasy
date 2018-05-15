@@ -1,10 +1,12 @@
 package controller;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -16,8 +18,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.sun.xml.internal.ws.addressing.model.InvalidAddressingHeaderException;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -51,17 +51,18 @@ public class MainController implements Initializable {
 	private Connection connection;
 
 	private DatabaseMetaData metaData;
+
 	@FXML
-	public TextField txtUsername;
+	public ComboBox<String> usernameCombo;
+
+	@FXML
+	public ComboBox<String> serverCombo;
+
+	@FXML
+	public ComboBox<String> databaseCombo;
 
 	@FXML
 	public TextField txtPassword;
-
-	@FXML
-	public TextField txtDatabase;
-
-	@FXML
-	public TextField txtServerUrl;
 
 	@FXML
 	public Label lblError;
@@ -94,8 +95,17 @@ public class MainController implements Initializable {
 	@FXML
 	private ScrollPane createScrollPane;
 
+	@FXML
+	private TextArea txtAreaQuery;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		try {
+			processCredentialList();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void clearContent() {
@@ -111,10 +121,10 @@ public class MainController implements Initializable {
 		try {
 			Class.forName(Constants.POSTGRES_DRIVER);
 			connection = DriverManager.getConnection(
-					Constants.POSTGRES + txtServerUrl.getText() + Constants.DEFAULT_PORT + txtDatabase.getText(),
-					txtUsername.getText(), txtPassword.getText());
+					Constants.POSTGRES + serverCombo.getValue() + Constants.DEFAULT_PORT + databaseCombo.getValue(),
+					usernameCombo.getValue(), txtPassword.getText());
 			if (connection.isValid(0)) {
-				showTables(txtDatabase.getText());
+				showTables();
 			}
 		} catch (
 
@@ -124,7 +134,7 @@ public class MainController implements Initializable {
 
 	}
 
-	private void showTables(String dbName) throws SQLException {
+	private void showTables() throws SQLException {
 		metaData = connection.getMetaData();
 		String[] types = { Constants.TABLE };
 		ResultSet rs = metaData.getTables(null, Constants.PUBLIC, "%", types);
@@ -136,7 +146,6 @@ public class MainController implements Initializable {
 		fixedTableList.addAll(tableList);
 		listTableNames.getItems().addAll(tableList);
 		listTableNames.setStyle("-fx-font-size:16px;-fx-font-weight:bold;");
-		lblMainDBName.setText(dbName);
 
 	}
 
@@ -322,14 +331,8 @@ public class MainController implements Initializable {
 				columBuffer.append(" )");
 				valueBuffer.append(" )");
 				query.append(columBuffer).append(" VALUES ").append(valueBuffer);
-				ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-				for (Node node : anchorChilds) {
-					if (node instanceof TextArea) {
-						TextArea area = (TextArea) node;
-						area.setWrapText(true);
-						area.setText(query.toString());
-					}
-				}
+				txtAreaQuery.setWrapText(true);
+				txtAreaQuery.setText(query.toString());
 			}
 		} catch (Exception ex) {
 			Alert alert = new Alert(AlertType.ERROR);
@@ -360,14 +363,8 @@ public class MainController implements Initializable {
 	}
 
 	@FXML
-	private void onClear(ActionEvent event) {
-		ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-		for (Node node : anchorChilds) {
-			if (node instanceof TextArea) {
-				TextArea area = (TextArea) node;
-				area.setText("");
-			}
-		}
+	private void onClear(ActionEvent event) throws IOException {
+		txtAreaQuery.setText("");
 	}
 
 	@FXML
@@ -381,6 +378,40 @@ public class MainController implements Initializable {
 			showColumns(listTableNames.getSelectionModel().getSelectedItem());
 		}
 
+	}
+
+	public void processCredentialList() throws IOException {
+		ObservableList<String> usernameList = FXCollections.observableArrayList();
+		ObservableList<String> serverList = FXCollections.observableArrayList();
+		ObservableList<String> databaseList = FXCollections.observableArrayList();
+
+		String csvFile = "C:\\Users\\berdes\\Stuff\\javafx\\DatabaseEasy\\src\\util\\data.csv";
+		String line = "";
+		String cvsSplitBy = ",";
+
+		try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+
+			while ((line = br.readLine()) != null) {
+				if (line != "") {
+					String[] data = line.split(cvsSplitBy);
+					if (line != null && (!line.trim().equals(""))) {
+						usernameList.add(data[0]);
+						serverList.add(data[2]);
+						databaseList.add(data[3]);
+					}
+				}
+			}
+
+			usernameCombo.getItems().addAll(usernameList.stream().distinct().collect(Collectors.toList()));
+			usernameCombo.setEditable(true);
+			serverCombo.getItems().addAll(serverList.stream().distinct().collect(Collectors.toList()));
+			serverCombo.setEditable(true);
+			databaseCombo.getItems().addAll(databaseList.stream().distinct().collect(Collectors.toList()));
+			databaseCombo.setEditable(true);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
