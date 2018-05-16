@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
@@ -385,11 +386,12 @@ public class MainController implements Initializable {
 		ObservableList<String> serverList = FXCollections.observableArrayList();
 		ObservableList<String> databaseList = FXCollections.observableArrayList();
 
-		String csvFile = "C:\\Users\\berdes\\Stuff\\javafx\\DatabaseEasy\\src\\util\\data.csv";
 		String line = "";
 		String cvsSplitBy = ",";
 
-		try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+		try {
+			String currentDirectory = new File("").getAbsolutePath();
+			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "\\data\\data.csv"));
 
 			while ((line = br.readLine()) != null) {
 				if (line != "") {
