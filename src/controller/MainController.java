@@ -20,6 +20,8 @@ import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -28,6 +30,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -37,6 +40,9 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellDataFeatures;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -44,6 +50,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Callback;
 import util.ComponentUtil;
 import util.Constants;
 
@@ -150,7 +159,8 @@ public class MainController implements Initializable {
 
 	}
 
-	public void showColumns(String selectedTable) {
+	public void showColumns(String selectedTable) throws SQLException {
+		showTableView(selectedTable);
 
 		try {
 			lblTableName.setText(selectedTable);
@@ -369,7 +379,7 @@ public class MainController implements Initializable {
 	}
 
 	@FXML
-	private void onReset(ActionEvent event) {
+	private void onReset(ActionEvent event) throws SQLException {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle(Constants.ALERT);
 		alert.setHeaderText(Constants.RESET_MESSAGE);
@@ -416,4 +426,33 @@ public class MainController implements Initializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public void showTableView(String selectedTable) throws SQLException {
+		Stage tableStage = new Stage(); // new stage
+		tableStage.initModality(Modality.APPLICATION_MODAL);
+		ObservableList<ObservableList> data = FXCollections.observableArrayList();
+		TableView tableview = new TableView<>();
+		String SQL = "SELECT * from " + selectedTable;
+		// ResultSet
+		ResultSet rs = connection.createStatement().executeQuery(SQL);
+
+		for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
+			// We are using non property style for making dynamic table
+			final int j = i;
+			TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
+			col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
+				public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
+					return new SimpleStringProperty(param.getValue().get(j).toString());
+				}
+			});
+
+			tableview.getColumns().addAll(col);
+		}
+
+		Scene scene = new Scene(tableview);
+
+		tableStage.setScene(scene);
+		tableStage.show();
+
+	}
 }
