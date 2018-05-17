@@ -1,18 +1,15 @@
 package util;
 
 public class Credential {
-	
+
 	public String username;
-	
-	public String password;
-	
+
 	public String server;
-	
+
 	public String database;
 
-	public Credential(String username, String password, String server, String database) {
+	public Credential(String username, String server, String database) {
 		this.username = username;
-		this.password = password;
 		this.server = server;
 		this.database = database;
 	}
@@ -23,14 +20,6 @@ public class Credential {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	public String getServer() {
@@ -48,6 +37,5 @@ public class Credential {
 	public void setDatabase(String database) {
 		this.database = database;
 	}
-	
 
 }

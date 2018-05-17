@@ -1,8 +1,5 @@
 package controller;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
@@ -20,8 +17,6 @@ import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -30,7 +25,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -40,9 +34,6 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableColumn.CellDataFeatures;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
@@ -50,11 +41,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.util.Callback;
 import util.ComponentUtil;
 import util.Constants;
+import util.Credential;
 
 public class MainController implements Initializable {
 
@@ -111,9 +100,8 @@ public class MainController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		try {
-			processCredentialList();
+			showCredentials();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -123,6 +111,7 @@ public class MainController implements Initializable {
 		listTableNames.getItems().clear();
 		lblTableName.setText("");
 		gridPaneCreate.getChildren().clear();
+		txtAreaQuery.clear();
 	}
 
 	@FXML
@@ -135,10 +124,10 @@ public class MainController implements Initializable {
 					usernameCombo.getValue(), txtPassword.getText());
 			if (connection.isValid(0)) {
 				showTables();
+				ComponentUtil.addCredentials(usernameCombo.getValue(), serverCombo.getValue(),
+						databaseCombo.getValue());
 			}
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			lblError.setText(e.getLocalizedMessage());
 		}
 
@@ -160,8 +149,6 @@ public class MainController implements Initializable {
 	}
 
 	public void showColumns(String selectedTable) throws SQLException {
-		showTableView(selectedTable);
-
 		try {
 			lblTableName.setText(selectedTable);
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
@@ -391,68 +378,18 @@ public class MainController implements Initializable {
 
 	}
 
-	public void processCredentialList() throws IOException {
-		ObservableList<String> usernameList = FXCollections.observableArrayList();
-		ObservableList<String> serverList = FXCollections.observableArrayList();
-		ObservableList<String> databaseList = FXCollections.observableArrayList();
+	public void showCredentials() throws IOException {
+		List<Credential> credentialList = ComponentUtil.processCredentialList();
 
-		String line = "";
-		String cvsSplitBy = ",";
-
-		try {
-			String currentDirectory = new File("").getAbsolutePath();
-			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "\\data\\data.csv"));
-
-			while ((line = br.readLine()) != null) {
-				if (line != "") {
-					String[] data = line.split(cvsSplitBy);
-					if (line != null && (!line.trim().equals(""))) {
-						usernameList.add(data[0]);
-						serverList.add(data[2]);
-						databaseList.add(data[3]);
-					}
-				}
-			}
-
-			usernameCombo.getItems().addAll(usernameList.stream().distinct().collect(Collectors.toList()));
-			usernameCombo.setEditable(true);
-			serverCombo.getItems().addAll(serverList.stream().distinct().collect(Collectors.toList()));
-			serverCombo.setEditable(true);
-			databaseCombo.getItems().addAll(databaseList.stream().distinct().collect(Collectors.toList()));
-			databaseCombo.setEditable(true);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		usernameCombo.getItems()
+				.addAll(credentialList.stream().map(c -> c.getUsername()).distinct().collect(Collectors.toList()));
+		usernameCombo.setEditable(true);
+		serverCombo.getItems()
+				.addAll(credentialList.stream().map(c1 -> c1.getServer()).distinct().collect(Collectors.toList()));
+		serverCombo.setEditable(true);
+		databaseCombo.getItems()
+				.addAll(credentialList.stream().map(c2 -> c2.getDatabase()).distinct().collect(Collectors.toList()));
+		databaseCombo.setEditable(true);
 	}
 
-	@SuppressWarnings("unchecked")
-	public void showTableView(String selectedTable) throws SQLException {
-		Stage tableStage = new Stage(); // new stage
-		tableStage.initModality(Modality.APPLICATION_MODAL);
-		ObservableList<ObservableList> data = FXCollections.observableArrayList();
-		TableView tableview = new TableView<>();
-		String SQL = "SELECT * from " + selectedTable;
-		// ResultSet
-		ResultSet rs = connection.createStatement().executeQuery(SQL);
-
-		for (int i = 0; i < rs.getMetaData().getColumnCount(); i++) {
-			// We are using non property style for making dynamic table
-			final int j = i;
-			TableColumn col = new TableColumn(rs.getMetaData().getColumnName(i + 1));
-			col.setCellValueFactory(new Callback<CellDataFeatures<ObservableList, String>, ObservableValue<String>>() {
-				public ObservableValue<String> call(CellDataFeatures<ObservableList, String> param) {
-					return new SimpleStringProperty(param.getValue().get(j).toString());
-				}
-			});
-
-			tableview.getColumns().addAll(col);
-		}
-
-		Scene scene = new Scene(tableview);
-
-		tableStage.setScene(scene);
-		tableStage.show();
-
-	}
 }
