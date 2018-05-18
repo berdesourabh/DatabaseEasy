@@ -1,10 +1,10 @@
 package controller;
 
+import java.io.IOException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -16,8 +16,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.sun.xml.internal.ws.addressing.model.InvalidAddressingHeaderException;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -45,23 +43,25 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import util.ComponentUtil;
 import util.Constants;
+import util.Credential;
 
 public class MainController implements Initializable {
 
 	private Connection connection;
 
 	private DatabaseMetaData metaData;
+
 	@FXML
-	public TextField txtUsername;
+	public ComboBox<String> usernameCombo;
+
+	@FXML
+	public ComboBox<String> serverCombo;
+
+	@FXML
+	public ComboBox<String> databaseCombo;
 
 	@FXML
 	public TextField txtPassword;
-
-	@FXML
-	public TextField txtDatabase;
-
-	@FXML
-	public TextField txtServerUrl;
 
 	@FXML
 	public Label lblError;
@@ -94,8 +94,16 @@ public class MainController implements Initializable {
 	@FXML
 	private ScrollPane createScrollPane;
 
+	@FXML
+	private TextArea txtAreaQuery;
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		try {
+			showCredentials();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void clearContent() {
@@ -103,6 +111,7 @@ public class MainController implements Initializable {
 		listTableNames.getItems().clear();
 		lblTableName.setText("");
 		gridPaneCreate.getChildren().clear();
+		txtAreaQuery.clear();
 	}
 
 	@FXML
@@ -111,20 +120,20 @@ public class MainController implements Initializable {
 		try {
 			Class.forName(Constants.POSTGRES_DRIVER);
 			connection = DriverManager.getConnection(
-					Constants.POSTGRES + txtServerUrl.getText() + Constants.DEFAULT_PORT + txtDatabase.getText(),
-					txtUsername.getText(), txtPassword.getText());
+					Constants.POSTGRES + serverCombo.getValue() + Constants.DEFAULT_PORT + databaseCombo.getValue(),
+					usernameCombo.getValue(), txtPassword.getText());
 			if (connection.isValid(0)) {
-				showTables(txtDatabase.getText());
+				showTables();
+				ComponentUtil.addCredentials(usernameCombo.getValue(), serverCombo.getValue(),
+						databaseCombo.getValue());
 			}
-		} catch (
-
-		Exception e) {
+		} catch (Exception e) {
 			lblError.setText(e.getLocalizedMessage());
 		}
 
 	}
 
-	private void showTables(String dbName) throws SQLException {
+	private void showTables() throws SQLException {
 		metaData = connection.getMetaData();
 		String[] types = { Constants.TABLE };
 		ResultSet rs = metaData.getTables(null, Constants.PUBLIC, "%", types);
@@ -136,12 +145,10 @@ public class MainController implements Initializable {
 		fixedTableList.addAll(tableList);
 		listTableNames.getItems().addAll(tableList);
 		listTableNames.setStyle("-fx-font-size:16px;-fx-font-weight:bold;");
-		lblMainDBName.setText(dbName);
 
 	}
 
-	public void showColumns(String selectedTable) {
-
+	public void showColumns(String selectedTable) throws SQLException {
 		try {
 			lblTableName.setText(selectedTable);
 			ResultSet columnResultSet = metaData.getColumns(null, null, selectedTable, null);
@@ -322,14 +329,8 @@ public class MainController implements Initializable {
 				columBuffer.append(" )");
 				valueBuffer.append(" )");
 				query.append(columBuffer).append(" VALUES ").append(valueBuffer);
-				ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-				for (Node node : anchorChilds) {
-					if (node instanceof TextArea) {
-						TextArea area = (TextArea) node;
-						area.setWrapText(true);
-						area.setText(query.toString());
-					}
-				}
+				txtAreaQuery.setWrapText(true);
+				txtAreaQuery.setText(query.toString());
 			}
 		} catch (Exception ex) {
 			Alert alert = new Alert(AlertType.ERROR);
@@ -360,18 +361,12 @@ public class MainController implements Initializable {
 	}
 
 	@FXML
-	private void onClear(ActionEvent event) {
-		ObservableList<Node> anchorChilds = anchorPaneCreate.getChildren();
-		for (Node node : anchorChilds) {
-			if (node instanceof TextArea) {
-				TextArea area = (TextArea) node;
-				area.setText("");
-			}
-		}
+	private void onClear(ActionEvent event) throws IOException {
+		txtAreaQuery.setText("");
 	}
 
 	@FXML
-	private void onReset(ActionEvent event) {
+	private void onReset(ActionEvent event) throws SQLException {
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle(Constants.ALERT);
 		alert.setHeaderText(Constants.RESET_MESSAGE);
@@ -381,6 +376,20 @@ public class MainController implements Initializable {
 			showColumns(listTableNames.getSelectionModel().getSelectedItem());
 		}
 
+	}
+
+	public void showCredentials() throws IOException {
+		List<Credential> credentialList = ComponentUtil.processCredentialList();
+
+		usernameCombo.getItems()
+				.addAll(credentialList.stream().map(c -> c.getUsername()).distinct().collect(Collectors.toList()));
+		usernameCombo.setEditable(true);
+		serverCombo.getItems()
+				.addAll(credentialList.stream().map(c1 -> c1.getServer()).distinct().collect(Collectors.toList()));
+		serverCombo.setEditable(true);
+		databaseCombo.getItems()
+				.addAll(credentialList.stream().map(c2 -> c2.getDatabase()).distinct().collect(Collectors.toList()));
+		databaseCombo.setEditable(true);
 	}
 
 }

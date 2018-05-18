@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.PasswordField?>
@@ -23,12 +24,11 @@
          <font>
             <Font name="System Bold" size="14.0" />
          </font></Label>
-      <TextField fx:id="txtUsername" layoutX="90.0" layoutY="37.0" prefHeight="27.0" prefWidth="130.0" promptText="Username" text="postgres" />
-      <Label layoutX="232.0" layoutY="42.0" text="Password" textFill="#11a4dd">
+      <Label layoutX="247.0" layoutY="45.0" text="Password" textFill="#11a4dd">
          <font>
             <Font name="System Bold" size="14.0" />
          </font></Label>
-      <PasswordField fx:id="txtPassword" layoutX="314.0" layoutY="37.0" prefHeight="27.0" prefWidth="131.0" promptText="Password" text="postgres">
+      <PasswordField fx:id="txtPassword" layoutX="324.0" layoutY="41.0" prefHeight="32.0" prefWidth="131.0" promptText="Password">
          <font>
             <Font size="10.0" />
          </font></PasswordField>
@@ -36,13 +36,11 @@
          <font>
             <Font name="System Bold" size="14.0" />
          </font></Label>
-      <TextField fx:id="txtServerUrl" layoutX="532.0" layoutY="38.0" prefHeight="27.0" prefWidth="130.0" promptText="Server Url" text="localhost" />
       <Label layoutX="691.0" layoutY="44.0" text="Database" textFill="#11a4dd">
          <font>
             <Font name="System Bold" size="14.0" />
          </font></Label>
-      <TextField fx:id="txtDatabase" layoutX="765.0" layoutY="39.0" prefHeight="27.0" prefWidth="130.0" promptText="Database" text="viewtrust_dev1" />
-      <Button fx:id="btnLogin" layoutX="933.0" layoutY="38.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="27.0" prefWidth="76.0" style="-fx-border-radius: 15px;" text="Login">
+      <Button fx:id="btnLogin" layoutX="929.0" layoutY="39.0" mnemonicParsing="false" onAction="#onLoginClick" prefHeight="32.0" prefWidth="90.0" style="-fx-border-radius: 15px;" text="Login">
          <font>
             <Font name="System Bold" size="12.0" />
          </font></Button>
@@ -88,8 +86,8 @@
                                           </ScrollPane>
                                           <Button fx:id="btnCreateSubmit" layoutX="589.0" layoutY="592.0" mnemonicParsing="false" onAction="#onCreateSubmit" prefHeight="27.0" prefWidth="98.0" text="Submit" />
                                           <TextArea fx:id="txtAreaQuery" layoutX="-4.0" layoutY="546.0" prefHeight="119.0" prefWidth="542.0" />
-                                          <Button fx:id="btnCreateClear" layoutX="589.0" layoutY="636.0" mnemonicParsing="false" onAction="#onClear" prefHeight="27.0" prefWidth="99.0" text="Clear" />
-                                          <Button fx:id="btnCreateReset" layoutX="587.0" layoutY="550.0" mnemonicParsing="false" onAction="#onReset" prefHeight="27.0" prefWidth="100.0" text="Reset" />
+                                          <Button fx:id="btnCreateClear" layoutX="588.0" layoutY="637.0" mnemonicParsing="false" onAction="#onClear" prefHeight="27.0" prefWidth="99.0" text="Clear" />
+                                          <Button fx:id="btnCreateReset" layoutX="588.0" layoutY="546.0" mnemonicParsing="false" onAction="#onReset" prefHeight="27.0" prefWidth="100.0" text="Reset" />
                                        </children>
                                     </AnchorPane>
                                  </children></AnchorPane>
@@ -101,5 +99,8 @@
             </AnchorPane>
         </items>
       </SplitPane>
+      <ComboBox fx:id="usernameCombo" layoutX="77.0" layoutY="42.0" prefHeight="32.0" prefWidth="150.0" />
+      <ComboBox fx:id="serverCombo" layoutX="522.0" layoutY="42.0" prefHeight="32.0" prefWidth="150.0" />
+      <ComboBox fx:id="databaseCombo" layoutX="759.0" layoutY="42.0" prefHeight="32.0" prefWidth="150.0" />
    </children>
 </AnchorPane>
