@@ -47,7 +47,7 @@ public class ComponentUtil {
 		String cvsSplitBy = ",";
 		try {
 			String currentDirectory = new File("").getAbsolutePath();
-			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/data/data.csv"));
+			BufferedReader br = new BufferedReader(new FileReader(currentDirectory + "/resource/data.csv"));
 
 			while ((line = br.readLine()) != null) {
 				if (line != "") {
@@ -78,7 +78,7 @@ public class ComponentUtil {
 		}
 
 		if (!isEqual) {
-			FileWriter pw = new FileWriter(currentDirectory + "/data/data.csv", true);
+			FileWriter pw = new FileWriter(currentDirectory + "/resource/data.csv", true);
 
 			pw.append(username);
 			pw.append(",");
